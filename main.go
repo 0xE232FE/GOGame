@@ -180,6 +180,11 @@ func start(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	var botdata *BotData = &BotData{
+		Planets: nil,
+		Moons:   nil,
+		Fleet:   nil,
+	}
 
 	e := echo.New()
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -188,6 +193,7 @@ func start(c *cli.Context) error {
 			ctx.Set("version", version)
 			ctx.Set("commit", commit)
 			ctx.Set("date", date)
+			ctx.Set("botdata", botdata)
 			return next(ctx)
 		}
 	})
@@ -281,6 +287,8 @@ func start(c *cli.Context) error {
 	e.GET("/api/*", ogame.GetStaticHandler)
 	e.HEAD("/api/*", ogame.GetStaticHEADHandler) // AntiGame uses this to check if the cached XML files need to be refreshed
 
+	e.GET("/planets/:planetID/:ogameID", WebBuildBuilding)
+
 	if enableTLS {
 		log.Println("Enable TLS Support")
 		return e.StartTLS(host+":"+strconv.Itoa(port), tlsCertFile, tlsKeyFile)
@@ -288,13 +296,14 @@ func start(c *cli.Context) error {
 	log.Println("Disable TLS Support")
 
 	go func() {
-		var data BotData
-		data.AddPlanets(bot.GetCachedPlanets())
-		//data.Planets[0].AddBuildingtoQueue(ogame.CrystalMine.ID, 0)
-		//data.Planets[0].AddBuildingtoQueue(ogame.MetalMine.ID, 0)
-		log.Print(data)
+		botdata.AddPlanets(bot.GetCachedPlanets())
+		log.Println("OGameID for Metalmine: " + ogame.MetalMine.GetID().String())
+
+		//botdata.Planets[0].AddBuildingtoQueue(ogame.CrystalMine.ID, 0)
+		//botdata.Planets[0].AddBuildingtoQueue(ogame.MetalMine.ID, 0)
+		log.Print(&botdata)
 		for {
-			BuildBot(bot, &data)
+			BuildBot(bot, botdata)
 			time.Sleep(10 * time.Second)
 		}
 	}()

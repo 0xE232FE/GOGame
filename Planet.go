@@ -37,7 +37,7 @@ func (e *ExtPlanet) updateLastupdate() {
 }
 
 // AddBuildingtoQueue adds a Building to Queue
-func (e *ExtPlanet) AddBuildingtoQueue(id ogame.ID, nbr int64) {
+func (e *ExtPlanet) AddBuildingtoQueue(id ogame.ID) {
 	log.Println("Add to queue " + id.String())
-	e.BuildQueue = append(e.BuildQueue, ogame.Quantifiable{ID: id, Nbr: nbr})
+	e.BuildQueue = append(e.BuildQueue, ogame.Quantifiable{ID: id})
 }
