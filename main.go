@@ -289,10 +289,9 @@ func start(c *cli.Context) error {
 
 	go func() {
 		var data BotData
-
 		data.AddPlanets(bot.GetCachedPlanets())
-		data.Planets[0].AddBuildingtoQueue(ogame.CrystalMine.ID, 0)
-		data.Planets[0].AddBuildingtoQueue(ogame.MetalMine.ID, 0)
+		//data.Planets[0].AddBuildingtoQueue(ogame.CrystalMine.ID, 0)
+		//data.Planets[0].AddBuildingtoQueue(ogame.MetalMine.ID, 0)
 		log.Print(data)
 		for {
 			BuildBot(bot, &data)
