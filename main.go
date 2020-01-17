@@ -2,10 +2,10 @@ package main
 
 import (
 	"crypto/subtle"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/alaingilbert/ogame"
 	"github.com/labstack/echo"
@@ -180,11 +180,6 @@ func start(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	var botdata *BotData = &BotData{
-		Planets: nil,
-		Moons:   nil,
-		Fleet:   nil,
-	}
 
 	e := echo.New()
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -193,7 +188,7 @@ func start(c *cli.Context) error {
 			ctx.Set("version", version)
 			ctx.Set("commit", commit)
 			ctx.Set("date", date)
-			ctx.Set("botdata", botdata)
+			//ctx.Set("botdata", botdata)
 			return next(ctx)
 		}
 	})
@@ -296,16 +291,20 @@ func start(c *cli.Context) error {
 	log.Println("Disable TLS Support")
 
 	go func() {
-		botdata.AddPlanets(bot.GetCachedPlanets())
-		log.Println("OGameID for Metalmine: " + ogame.MetalMine.GetID().String())
+		var botdata *BotData = &BotData{}
 
-		//botdata.Planets[0].AddBuildingtoQueue(ogame.CrystalMine.ID, 0)
-		//botdata.Planets[0].AddBuildingtoQueue(ogame.MetalMine.ID, 0)
-		log.Print(&botdata)
-		for {
-			BuildBot(bot, botdata)
-			time.Sleep(10 * time.Second)
+		planets := bot.GetPlanets()
+		var xp ExtPlanet
+		for _, p := range planets {
+			xp.Planet = p
+			botdata.Planet = append(botdata.Planet, xp)
 		}
+
+		botdata.Planet[0].updateBuildings(bot)
+		//BuildBot(bot, botdata)
+
+		fmt.Printf("Botdata: %s", botdata.Planet[0].ResourcesBuildings)
+
 	}()
 
 	return e.Start(host + ":" + strconv.Itoa(port))
